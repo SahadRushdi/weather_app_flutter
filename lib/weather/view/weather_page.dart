@@ -6,7 +6,6 @@ import '../../search/view/search_page.dart';
 import '../../settings/view/settings_page.dart';
 import '../cubit/weather_cubit.dart';
 
-
 class WeatherPage extends StatelessWidget {
   const WeatherPage({super.key});
 
@@ -28,9 +27,9 @@ class WeatherPage extends StatelessWidget {
         child: BlocBuilder<WeatherCubit, WeatherState>(
           builder: (context, state) {
             return switch (state.status) {
-              WeatherStatus.initial => const (),
-              WeatherStatus.loading => const (),
-              WeatherStatus.failure => const (),
+              WeatherStatus.initial => const Center(child: Text('Please select a city')),
+              WeatherStatus.loading => const Center(child: CircularProgressIndicator()),
+              WeatherStatus.failure => const Center(child: Text('Something went wrong!')),
               WeatherStatus.success => WeatherPopulated(
                 weather: state.weather,
                 units: state.temperatureUnits,
@@ -54,6 +53,62 @@ class WeatherPage extends StatelessWidget {
   }
 }
 
-// TODO weather write the logic for the weather_populated function.
-WeatherPopulated({required Weather weather, required TemperatureUnits units, required Future<void> Function() onRefresh}) {
+// WeatherPopulated widget to display the weather when successfully fetched
+class WeatherPopulated extends StatelessWidget {
+  final Weather weather;
+  final TemperatureUnits units;
+  final Future<void> Function() onRefresh;
+
+  const WeatherPopulated({
+    super.key,
+    required this.weather,
+    required this.units,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                weather.location,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${_formattedTemperature(weather.temperature as double, units)}°',
+                style: const TextStyle(
+                  fontSize: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                weather.condition as String,
+                style: const TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              // Add more weather information as needed
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formattedTemperature(double temperature, TemperatureUnits units) {
+    return switch (units) {
+      TemperatureUnits.celsius => temperature.toStringAsFixed(0),
+      TemperatureUnits.fahrenheit => ((temperature * 9 / 5) + 32).toStringAsFixed(0),
+    };
+  }
 }
