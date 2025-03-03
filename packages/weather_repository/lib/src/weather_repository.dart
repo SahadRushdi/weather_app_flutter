@@ -15,12 +15,14 @@ class WeatherRepository {
       latitude: location.latitude,
       longitude: location.longitude,
     );
+
     return Weather(
-      temperature: weather.temperature,
+      temperature: weather.temperature, // Assuming temperature is a double
       location: location.name,
       condition: weather.weatherCode.toInt().toCondition,
     );
   }
+
 }
 
 extension on int {
